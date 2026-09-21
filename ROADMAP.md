@@ -3,7 +3,7 @@
 ## M0 — Foundation
 
 - Repository purpose and scope
-- MIT license
+- GPL-2.0-or-later license
 - Software/profile directory model
 - Initial profile specification
 - Architecture and lifecycle principles
@@ -14,21 +14,40 @@
 - Manifest validation
 - Shared installer helpers
 - install/status/remove lifecycle
-- DietPi and architecture detection
-- idempotency tests
-- logging and error handling
+- DietPi and Debian detection
+- Architecture detection
+- Per-item compatibility and resource requirements
+- Idempotency tests
+- Logging and error handling
 
 ## M2 — First software family: honeypots
 
-Initial candidates:
+Planned software items:
 
-- OpenCanary
-- Cowrie
-- Heralding
-- Dionaea
-- Conpot
+- OpenCanary — lightweight multi-service honeypot
+- Cowrie — SSH/Telnet honeypot
+- Heralding — credential-capturing honeypot for multiple protocols
+- Dionaea — network service/malware interaction honeypot
+- Conpot — ICS/SCADA honeypot
+- Endlessh — lightweight SSH tarpit
+- T-Pot — comprehensive multi-honeypot platform
 
-Lightweight services should be qualified first on constrained SBCs.
+DietPi-Software is a general DietPi project. Honeypot availability is determined
+per software item from its actual platform and resource requirements, rather
+than by targeting one particular SBC.
+
+Each software item should declare compatibility metadata where applicable:
+
+- supported architectures (armhf, arm64, amd64, etc.)
+- supported DietPi/Debian releases
+- minimum RAM
+- minimum storage
+- native/container requirements
+- required kernel or system capabilities
+- network/port requirements
+
+Installers should detect unsupported hosts and fail clearly before making
+system changes.
 
 ## M3 — Profiles
 
@@ -39,13 +58,23 @@ Compose software items into reusable roles, for example:
 - honeypot-multiservice
 - central-collector
 
+Profiles must evaluate the compatibility requirements of all included software
+items before installation.
+
 ## M4 — Multi-platform qualification
 
-Qualification tiers:
+Qualification is capability-based rather than tied to one board family.
 
-1. Physical Orange Pi Zero / Zero LTS
-2. Other supported DietPi ARM systems
-3. DietPi x86_64
+Planned coverage includes:
+
+- DietPi armhf
+- DietPi arm64
+- DietPi amd64
+- constrained SBCs where applicable
+- higher-resource SBCs and systems for demanding software such as T-Pot
+
+Orange Pi Zero / Zero LTS can be used as an early physical armhf qualification
+platform, but it does not define the scope of DietPi-Software.
 
 ## M5 — Additional software families
 
