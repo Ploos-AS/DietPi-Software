@@ -31,8 +31,11 @@ exit 7
 EOF
 chmod +x "$TMP/fail"
 set +e
-dps_run_logged example install "$TMP/fail"
-rc=$?
+if dps_run_logged example install "$TMP/fail"; then
+    rc=0
+else
+    rc=$?
+fi
 set -e
 [[ $rc == 7 ]]
 grep -q lifecycle-fail "$DPS_LOG_ROOT/example.log"

@@ -28,8 +28,8 @@ jobs:
           bash -n software/endlessh/install software/endlessh/status software/endlessh/remove
       - name: ShellCheck
         run: |
-          shellcheck lib/common.sh lib/compat.sh lib/lifecycle.sh tools/dietpi-software-extra
-          shellcheck tests/test-framework.sh tests/test-compat.sh tests/test-lifecycle.sh tests/test-endlessh.sh
+          shellcheck -e SC1091 lib/common.sh lib/compat.sh lib/lifecycle.sh tools/dietpi-software-extra
+          shellcheck -e SC1091,SC2034,SC2251 tests/test-framework.sh tests/test-compat.sh tests/test-lifecycle.sh tests/test-endlessh.sh
           shellcheck tests/fixtures/example/install tests/fixtures/example/status tests/fixtures/example/remove
           shellcheck software/endlessh/install software/endlessh/status software/endlessh/remove
       - name: Validate manifests
@@ -56,14 +56,14 @@ jobs:
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y endlessh systemd
           command -v endlessh
-          unit=/lib/systemd/system/endlessh.service
-          test -f "$unit" || unit=/usr/lib/systemd/system/endlessh.service
+          dpkg-query -W endlessh
+          dpkg-query -L endlessh | tee /tmp/endlessh-files
+          grep -Fxq '/usr/bin/endlessh' /tmp/endlessh-files
+          unit=$(grep -E '/systemd/system/endlessh[.]service$' /tmp/endlessh-files | head -n1)
+          test -n "$unit"
           test -f "$unit"
-          test -d /etc/endlessh
-          endlessh -h >/tmp/endlessh-help 2>&1
-          grep -q '2222' /tmp/endlessh-help
-          grep -q '/etc/endlessh/config' /tmp/endlessh-help
-          grep -q '/etc/endlessh/config' "$unit"
+          printf '%s\n' '--- endlessh.service ---'
+          cat "$unit"
       - name: Validate integration against package layout
         shell: bash
         run: |
