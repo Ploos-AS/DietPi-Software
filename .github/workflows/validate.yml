@@ -3,6 +3,7 @@ name: Validate
 on:
   push:
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -16,16 +17,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in README.md LICENSE ROADMAP.md docs/PROFILE_SPEC.md software/README.md profiles/README.md lib/README.md tests/README.md tools/README.md lib/common.sh lib/compat.sh lib/lifecycle.sh tools/dietpi-software-extra tools/validate-manifests.py tests/test-framework.sh tests/test-compat.sh tests/test-lifecycle.sh tests/test-endlessh.sh tests/test-endlessh.sh; do
+          for f in README.md LICENSE ROADMAP.md docs/PROFILE_SPEC.md software/README.md profiles/README.md lib/README.md tests/README.md tools/README.md lib/common.sh lib/compat.sh lib/lifecycle.sh tools/dietpi-software-extra tools/manifest-env.py tools/validate-manifests.py tests/test-framework.sh tests/test-compat.sh tests/test-lifecycle.sh tests/test-endlessh.sh; do
             test -s "$f"
           done
       - name: Shell syntax
         run: |
-          bash -n lib/common.sh lib/compat.sh lib/lifecycle.sh tools/dietpi-software-extra tests/test-framework.sh tests/test-compat.sh tests/test-lifecycle.sh
-          bash -n tests/fixtures/example/install tests/fixtures/example/status tests/fixtures/example/remove software/endlessh/install software/endlessh/status software/endlessh/remove
+          bash -n lib/common.sh lib/compat.sh lib/lifecycle.sh tools/dietpi-software-extra
+          bash -n tests/test-framework.sh tests/test-compat.sh tests/test-lifecycle.sh tests/test-endlessh.sh
+          bash -n tests/fixtures/example/install tests/fixtures/example/status tests/fixtures/example/remove
           bash -n software/endlessh/install software/endlessh/status software/endlessh/remove
       - name: ShellCheck
-        run: shellcheck lib/common.sh lib/compat.sh lib/lifecycle.sh tools/dietpi-software-extra tests/test-framework.sh tests/test-compat.sh tests/test-lifecycle.sh tests/fixtures/example/install tests/fixtures/example/status tests/fixtures/example/remove
+        run: |
+          shellcheck lib/common.sh lib/compat.sh lib/lifecycle.sh tools/dietpi-software-extra
+          shellcheck tests/test-framework.sh tests/test-compat.sh tests/test-lifecycle.sh tests/test-endlessh.sh
+          shellcheck tests/fixtures/example/install tests/fixtures/example/status tests/fixtures/example/remove
+          shellcheck software/endlessh/install software/endlessh/status software/endlessh/remove
       - name: Validate manifests
         run: |
           python3 tools/validate-manifests.py
@@ -36,7 +42,6 @@ jobs:
           bash tests/test-compat.sh
           bash tests/test-lifecycle.sh
           bash tests/test-endlessh.sh
-
 
   endlessh-package:
     runs-on: ubuntu-latest
@@ -50,19 +55,18 @@ jobs:
           set -euo pipefail
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y endlessh systemd
-          test -x /usr/bin/endlessh
-          test -f /lib/systemd/system/endlessh.service || test -f /usr/lib/systemd/system/endlessh.service
+          command -v endlessh
+          unit=/lib/systemd/system/endlessh.service
+          test -f "$unit" || unit=/usr/lib/systemd/system/endlessh.service
+          test -f "$unit"
           test -d /etc/endlessh
-          /usr/bin/endlessh -h >/tmp/endlessh-help 2>&1 || rc=$?
-          test "${rc:-0}" -eq 0
+          endlessh -h >/tmp/endlessh-help 2>&1
           grep -q '2222' /tmp/endlessh-help
           grep -q '/etc/endlessh/config' /tmp/endlessh-help
-      - name: Validate Endlessh integration against package layout
+          grep -q '/etc/endlessh/config' "$unit"
+      - name: Validate integration against package layout
         shell: bash
         run: |
           set -euo pipefail
-          unit=/lib/systemd/system/endlessh.service
-          test -f "$unit" || unit=/usr/lib/systemd/system/endlessh.service
-          grep -q '/etc/endlessh/config' "$unit"
           grep -q 'ENDLESSH_PORT:-2222' software/endlessh/install
           grep -q '/etc/endlessh/config' software/endlessh/install
