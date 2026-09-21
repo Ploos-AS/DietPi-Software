@@ -61,6 +61,8 @@ Initial candidates include:
 - Heralding
 - Dionaea
 - Conpot
+- Endlessh
+- T-Pot (on hosts which meet its resource requirements)
 
 The project will prefer lightweight individual services on constrained hardware rather than assuming a large all-in-one honeypot distribution.
 
@@ -98,4 +100,3 @@ Project code and documentation in this repository are licensed under **GPL-2.0-o
 
 Third-party applications installed by this project retain their own upstream licenses. See [LICENSE](LICENSE).
 
-<!-- CI qualification probe: exercises pull_request validation before M2.1 gate. -->
