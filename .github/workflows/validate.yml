@@ -16,28 +16,20 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test -s README.md
-          test -s LICENSE
-          test -s ROADMAP.md
-          test -s docs/PROFILE_SPEC.md
-          test -s software/README.md
-          test -s profiles/README.md
-          test -s lib/README.md
-          test -s tests/README.md
-          test -s tools/README.md
-          test -s lib/common.sh
-          test -s tools/dietpi-software-extra
-          test -s tools/validate-manifests.py
-          test -s tests/test-framework.sh
+          for f in README.md LICENSE ROADMAP.md docs/PROFILE_SPEC.md software/README.md profiles/README.md lib/README.md tests/README.md tools/README.md lib/common.sh lib/compat.sh tools/dietpi-software-extra tools/validate-manifests.py tests/test-framework.sh tests/test-compat.sh; do
+            test -s "$f"
+          done
       - name: Shell syntax
         run: |
-          bash -n lib/common.sh tools/dietpi-software-extra tests/test-framework.sh
+          bash -n lib/common.sh lib/compat.sh tools/dietpi-software-extra tests/test-framework.sh tests/test-compat.sh
           bash -n tests/fixtures/example/install tests/fixtures/example/status tests/fixtures/example/remove
       - name: ShellCheck
-        run: shellcheck lib/common.sh tools/dietpi-software-extra tests/test-framework.sh tests/fixtures/example/install tests/fixtures/example/status tests/fixtures/example/remove
+        run: shellcheck lib/common.sh lib/compat.sh tools/dietpi-software-extra tests/test-framework.sh tests/test-compat.sh tests/fixtures/example/install tests/fixtures/example/status tests/fixtures/example/remove
       - name: Validate manifests
         run: |
           python3 tools/validate-manifests.py
           python3 tools/validate-manifests.py --root tests/fixtures
-      - name: Framework lifecycle tests
-        run: bash tests/test-framework.sh
+      - name: Framework tests
+        run: |
+          bash tests/test-framework.sh
+          bash tests/test-compat.sh
