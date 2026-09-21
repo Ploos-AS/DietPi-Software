@@ -16,7 +16,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in README.md LICENSE ROADMAP.md docs/PROFILE_SPEC.md software/README.md profiles/README.md lib/README.md tests/README.md tools/README.md lib/common.sh lib/compat.sh lib/lifecycle.sh tools/dietpi-software-extra tools/validate-manifests.py tests/test-framework.sh tests/test-compat.sh tests/test-lifecycle.sh; do
+          for f in README.md LICENSE ROADMAP.md docs/PROFILE_SPEC.md software/README.md profiles/README.md lib/README.md tests/README.md tools/README.md lib/common.sh lib/compat.sh lib/lifecycle.sh tools/dietpi-software-extra tools/validate-manifests.py tests/test-framework.sh tests/test-compat.sh tests/test-lifecycle.sh tests/test-endlessh.sh tests/test-endlessh.sh; do
             test -s "$f"
           done
       - name: Shell syntax
@@ -35,3 +35,4 @@ jobs:
           bash tests/test-framework.sh
           bash tests/test-compat.sh
           bash tests/test-lifecycle.sh
+          bash tests/test-endlessh.sh
