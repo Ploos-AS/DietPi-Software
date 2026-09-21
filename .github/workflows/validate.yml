@@ -56,16 +56,13 @@ jobs:
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y endlessh systemd
           command -v endlessh
-          unit=/lib/systemd/system/endlessh.service
-          test -f "$unit" || unit=/usr/lib/systemd/system/endlessh.service
+          dpkg-query -W endlessh
+          dpkg-query -L endlessh | tee /tmp/endlessh-files
+          grep -Fxq '/usr/bin/endlessh' /tmp/endlessh-files
+          unit=$(grep -E '/systemd/system/endlessh[.]service$' /tmp/endlessh-files | head -n1)
+          test -n "$unit"
           test -f "$unit"
-          dpkg-query -W -f='\${Status} \${Version}\\n' endlessh | grep -q '^install ok installed '
-          dpkg-query -L endlessh > /tmp/endlessh-files
-          grep -qx '/usr/bin/endlessh' /tmp/endlessh-files
-          grep -Eq '^/(lib|usr/lib)/systemd/system/endlessh[.]service$' /tmp/endlessh-files
-          printf '%s\\n' '--- endlessh package files ---'
-          cat /tmp/endlessh-files
-          printf '%s\\n' '--- endlessh.service ---'
+          printf '%s\n' '--- endlessh.service ---'
           cat "$unit"
       - name: Validate integration against package layout
         shell: bash
