@@ -1,0 +1,8 @@
+{
+  "id": "example",
+  "name": "Example",
+  "description": "Framework lifecycle fixture",
+  "architectures": ["armhf", "arm64", "amd64"],
+  "license": "GPL-2.0-or-later",
+  "upstream": "https://example.invalid/"
+}
