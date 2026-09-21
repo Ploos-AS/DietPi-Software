@@ -21,5 +21,16 @@ EOF
 	chmod 0644 "$CONFIG"
 fi
 
+unit=$(systemctl show -p FragmentPath --value endlessh.service)
+[[ -n $unit && -f $unit ]] || { echo "endlessh.service was not installed by the Debian package." >&2; exit 1; }
+grep -q '/etc/endlessh/config' "$unit" || {
+	echo "endlessh.service does not reference /etc/endlessh/config as expected." >&2
+	exit 1
+}
+
 systemctl enable --now endlessh.service
 systemctl is-active --quiet endlessh.service
+ss -H -lnt | awk '{print $4}' | grep -Eq "[:.]$PORT$" || {
+	echo "Endlessh is active but is not listening on TCP port $PORT." >&2
+	exit 1
+}
