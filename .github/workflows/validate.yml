@@ -22,7 +22,8 @@ jobs:
       - name: Shell syntax
         run: |
           bash -n lib/common.sh lib/compat.sh lib/lifecycle.sh tools/dietpi-software-extra tests/test-framework.sh tests/test-compat.sh tests/test-lifecycle.sh
-          bash -n tests/fixtures/example/install tests/fixtures/example/status tests/fixtures/example/remove
+          bash -n tests/fixtures/example/install tests/fixtures/example/status tests/fixtures/example/remove software/endlessh/install software/endlessh/status software/endlessh/remove
+          bash -n software/endlessh/install software/endlessh/status software/endlessh/remove
       - name: ShellCheck
         run: shellcheck lib/common.sh lib/compat.sh lib/lifecycle.sh tools/dietpi-software-extra tests/test-framework.sh tests/test-compat.sh tests/test-lifecycle.sh tests/fixtures/example/install tests/fixtures/example/status tests/fixtures/example/remove
       - name: Validate manifests
