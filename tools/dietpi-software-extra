@@ -1,22 +1,21 @@
 #!/bin/bash
 # SPDX-License-Identifier: GPL-2.0-or-later
-
 set -o errexit
 set -o nounset
 set -o pipefail
 
 ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
-# shellcheck source=../lib/common.sh
 source "$ROOT_DIR/lib/common.sh"
+source "$ROOT_DIR/lib/compat.sh"
 
 usage() {
 	cat <<'EOF'
 Usage: dietpi-software-extra <command> [item]
-
 Commands:
   platform          Show detected host information
   list              List repository software items
-  install <item>    Install an item
+  check <item>      Check item compatibility
+  install <item>    Check compatibility and install an item
   status <item>     Show item status
   remove <item>     Remove an item
 EOF
@@ -28,12 +27,31 @@ item_dir() {
 	printf '%s/software/%s\n' "$ROOT_DIR" "$name"
 }
 
+load_manifest() {
+	local dir=$1 manifest="$1/manifest.json"
+	[[ -f $manifest ]] || dps_die "Missing manifest: $manifest"
+	eval "$(python3 "$ROOT_DIR/tools/manifest-env.py" "$manifest")"
+	export DPS_ARCHITECTURES DPS_DEBIAN_CODENAMES DPS_MIN_RAM_MIB
+	export DPS_MIN_STORAGE_MIB DPS_REQUIRES_CONTAINER DPS_REQUIRED_COMMANDS
+	export DPS_REQUIRED_CAPABILITIES
+}
+
+check_item() {
+	local name=$1 dir
+	dir=$(item_dir "$name")
+	[[ -d $dir ]] || dps_die "Unknown software item: $name"
+	load_manifest "$dir"
+	dps_check_compatibility
+	dps_log "$name is compatible with this host."
+}
+
 run_lifecycle() {
 	local action=$1 name=$2 dir
 	dir=$(item_dir "$name")
 	[[ -d $dir ]] || dps_die "Unknown software item: $name"
 	[[ -x $dir/$action ]] || dps_die "$name does not implement $action"
 	dps_require_root
+	if [[ $action == install ]]; then check_item "$name"; fi
 	exec "$dir/$action"
 }
 
@@ -42,19 +60,18 @@ case "${1:-}" in
 		printf 'dietpi=%s\n' "$(dps_is_dietpi && echo yes || echo no)"
 		printf 'architecture=%s\n' "$(dps_detect_arch)"
 		printf 'debian_codename=%s\n' "$(dps_detect_debian)"
+		printf 'ram_mib=%s\n' "$(dps_mem_mib)"
+		printf 'free_storage_mib=%s\n' "$(dps_free_mib /)"
 		;;
-	list)
-		find "$ROOT_DIR/software" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort
+	list) find "$ROOT_DIR/software" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort ;;
+	check)
+		[[ $# == 2 ]] || { usage >&2; exit 2; }
+		check_item "$2"
 		;;
 	install|status|remove)
 		[[ $# == 2 ]] || { usage >&2; exit 2; }
 		run_lifecycle "$1" "$2"
 		;;
-	-h|--help|help|'')
-		usage
-		;;
-	*)
-		usage >&2
-		exit 2
-		;;
+	-h|--help|help|'') usage ;;
+	*) usage >&2; exit 2 ;;
 esac
