@@ -1,0 +1,8 @@
+#!/bin/bash
+# SPDX-License-Identifier: GPL-2.0-or-later
+set -euo pipefail
+
+systemctl disable --now endlessh.service 2>/dev/null || true
+DEBIAN_FRONTEND=noninteractive apt-get remove -y endlessh
+
+echo "Configuration under /etc/endlessh is preserved."
