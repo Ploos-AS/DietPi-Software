@@ -22,9 +22,11 @@ OPTIONAL_TYPES = {
     "debian_codenames": list,
     "commands": list,
     "capabilities": list,
+    "ports": list,
 }
 VALID_ARCH = {"armhf", "arm64", "amd64", "i386", "riscv64"}
 VALID_CONTAINER = {"none", "docker", "podman", "any"}
+VALID_CAPABILITIES = {"root", "systemd", "ipv4", "ipv6"}
 
 errors = []
 for manifest in sorted(args.root.glob("*/manifest.json")):
@@ -51,6 +53,12 @@ for manifest in sorted(args.root.glob("*/manifest.json")):
             errors.append(f"{manifest}: unsupported architecture value: {arch}")
     if data.get("container", "none") not in VALID_CONTAINER:
         errors.append(f"{manifest}: invalid container requirement")
+    for capability in data.get("capabilities", []):
+        if capability not in VALID_CAPABILITIES:
+            errors.append(f"{manifest}: invalid capability: {capability}")
+    for port in data.get("ports", []):
+        if not isinstance(port, int) or isinstance(port, bool) or not 1 <= port <= 65535:
+            errors.append(f"{manifest}: invalid port: {port}")
     for key in ("min_ram_mib", "min_storage_mib"):
         if key in data and data[key] < 0:
             errors.append(f"{manifest}: {key} must not be negative")
