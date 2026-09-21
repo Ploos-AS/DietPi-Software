@@ -13,14 +13,15 @@ the real SSH service.
 
 Configuration is stored in `/etc/endlessh/config`.
 
-To select another free port for the initial install:
+To select another free unprivileged port (1024-65535) for the initial install:
 
 ```sh
 ENDLESSH_PORT=2222 dietpi-software-extra install endlessh
 ```
 
-Moving the real SSH service and exposing Endlessh on port 22 is a separate,
-explicit administrator action and is not performed automatically.
+If an existing `/etc/endlessh/config` is present, it is preserved and its configured `Port` value is used for the post-install listener check. `ENDLESSH_PORT` only controls creation of a new configuration.
+
+Moving the real SSH service and exposing Endlessh on port 22 requires a separate, explicit privileged-port setup and is not performed automatically.
 
 ## Lifecycle
 
