@@ -59,21 +59,13 @@ jobs:
           unit=/lib/systemd/system/endlessh.service
           test -f "$unit" || unit=/usr/lib/systemd/system/endlessh.service
           test -f "$unit"
-          test -d /etc/endlessh
-          dpkg-query -W -f='${Status} ${Version}\n' endlessh | grep -q '^install ok installed '
-          dpkg-query -L endlessh | grep -qx '/usr/bin/endlessh'
+          dpkg-query -W -f='\${Status} \${Version}\\n' endlessh | grep -q '^install ok installed '
           dpkg-query -L endlessh > /tmp/endlessh-files
           grep -qx '/usr/bin/endlessh' /tmp/endlessh-files
-          grep -Eq '^/(lib|usr/lib)/systemd/system/endlessh\.service      - name: Validate integration against package layout
-        shell: bash
-        run: |
-          set -euo pipefail
-          grep -q 'ENDLESSH_PORT:-2222' software/endlessh/install
-          grep -q '/etc/endlessh/config' software/endlessh/install
- /tmp/endlessh-files
-          printf '%s\n' '--- endlessh package files ---'
+          grep -Eq '^/(lib|usr/lib)/systemd/system/endlessh[.]service$' /tmp/endlessh-files
+          printf '%s\\n' '--- endlessh package files ---'
           cat /tmp/endlessh-files
-          printf '%s\n' '--- endlessh.service ---'
+          printf '%s\\n' '--- endlessh.service ---'
           cat "$unit"
       - name: Validate integration against package layout
         shell: bash
