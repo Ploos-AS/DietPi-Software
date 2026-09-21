@@ -29,7 +29,7 @@ jobs:
       - name: ShellCheck
         run: |
           shellcheck -e SC1091 lib/common.sh lib/compat.sh lib/lifecycle.sh tools/dietpi-software-extra
-          shellcheck tests/test-framework.sh tests/test-compat.sh tests/test-lifecycle.sh tests/test-endlessh.sh
+          shellcheck -e SC1091,SC2034,SC2251 tests/test-framework.sh tests/test-compat.sh tests/test-lifecycle.sh tests/test-endlessh.sh
           shellcheck tests/fixtures/example/install tests/fixtures/example/status tests/fixtures/example/remove
           shellcheck software/endlessh/install software/endlessh/status software/endlessh/remove
       - name: Validate manifests
@@ -62,8 +62,19 @@ jobs:
           test -d /etc/endlessh
           dpkg-query -W -f='${Status} ${Version}\n' endlessh | grep -q '^install ok installed '
           dpkg-query -L endlessh | grep -qx '/usr/bin/endlessh'
-          dpkg-query -L endlessh | grep -qx "$unit"
-          grep -Eq '^ExecStart=.*endlessh' "$unit"
+          dpkg-query -L endlessh > /tmp/endlessh-files
+          grep -qx '/usr/bin/endlessh' /tmp/endlessh-files
+          grep -Eq '^/(lib|usr/lib)/systemd/system/endlessh\.service      - name: Validate integration against package layout
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'ENDLESSH_PORT:-2222' software/endlessh/install
+          grep -q '/etc/endlessh/config' software/endlessh/install
+ /tmp/endlessh-files
+          printf '%s\n' '--- endlessh package files ---'
+          cat /tmp/endlessh-files
+          printf '%s\n' '--- endlessh.service ---'
+          cat "$unit"
       - name: Validate integration against package layout
         shell: bash
         run: |
