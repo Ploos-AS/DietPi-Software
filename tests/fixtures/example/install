@@ -1,0 +1,5 @@
+#!/bin/bash
+set -euo pipefail
+state=${DPS_TEST_STATE:?}
+mkdir -p "$state"
+printf 'installed\n' > "$state/example"
