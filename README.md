@@ -80,7 +80,9 @@ See [docs/PROFILE_SPEC.md](docs/PROFILE_SPEC.md) for the initial specification.
 
 M0 establishes the repository, scope, directory model, licensing and validation baseline.
 
-M1 will introduce the executable framework: manifests, DietPi/platform detection, shared installer helpers, lifecycle handling and automated validation.
+M1 provides the executable framework: validated manifests, DietPi/platform detection, compatibility preflight, shared installer helpers, lifecycle state/logging and automated validation.
+
+M1 framework implementation is complete. M2 introduces the first real software integrations.
 
 See [ROADMAP.md](ROADMAP.md).
 
