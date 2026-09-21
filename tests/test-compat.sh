@@ -20,6 +20,8 @@ dps_check_arch "$arch" "$arch"
 dps_check_minimum 1024 512
 ! dps_check_minimum 256 512
 dps_has_command sh
+dps_check_capability root || [[ $EUID -ne 0 ]]
+dps_port_available 65534 || true
 ! dps_has_command definitely-not-a-real-command-dps
 
 DPS_ARCHITECTURES="$arch"
