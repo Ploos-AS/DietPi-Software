@@ -1,0 +1,27 @@
+name: Validate
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check repository baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s README.md
+          test -s LICENSE
+          test -s ROADMAP.md
+          test -s docs/PROFILE_SPEC.md
+          test -s software/README.md
+          test -s profiles/README.md
+          test -s lib/README.md
+          test -s tests/README.md
+          test -s tools/README.md
