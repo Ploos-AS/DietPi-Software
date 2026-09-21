@@ -16,15 +16,15 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in README.md LICENSE ROADMAP.md docs/PROFILE_SPEC.md software/README.md profiles/README.md lib/README.md tests/README.md tools/README.md lib/common.sh lib/compat.sh tools/dietpi-software-extra tools/validate-manifests.py tests/test-framework.sh tests/test-compat.sh; do
+          for f in README.md LICENSE ROADMAP.md docs/PROFILE_SPEC.md software/README.md profiles/README.md lib/README.md tests/README.md tools/README.md lib/common.sh lib/compat.sh lib/lifecycle.sh tools/dietpi-software-extra tools/validate-manifests.py tests/test-framework.sh tests/test-compat.sh tests/test-lifecycle.sh; do
             test -s "$f"
           done
       - name: Shell syntax
         run: |
-          bash -n lib/common.sh lib/compat.sh tools/dietpi-software-extra tests/test-framework.sh tests/test-compat.sh
+          bash -n lib/common.sh lib/compat.sh lib/lifecycle.sh tools/dietpi-software-extra tests/test-framework.sh tests/test-compat.sh tests/test-lifecycle.sh
           bash -n tests/fixtures/example/install tests/fixtures/example/status tests/fixtures/example/remove
       - name: ShellCheck
-        run: shellcheck lib/common.sh lib/compat.sh tools/dietpi-software-extra tests/test-framework.sh tests/test-compat.sh tests/fixtures/example/install tests/fixtures/example/status tests/fixtures/example/remove
+        run: shellcheck lib/common.sh lib/compat.sh lib/lifecycle.sh tools/dietpi-software-extra tests/test-framework.sh tests/test-compat.sh tests/test-lifecycle.sh tests/fixtures/example/install tests/fixtures/example/status tests/fixtures/example/remove
       - name: Validate manifests
         run: |
           python3 tools/validate-manifests.py
@@ -33,3 +33,4 @@ jobs:
         run: |
           bash tests/test-framework.sh
           bash tests/test-compat.sh
+          bash tests/test-lifecycle.sh
