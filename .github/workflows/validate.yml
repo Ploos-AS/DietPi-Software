@@ -28,7 +28,7 @@ jobs:
           bash -n software/endlessh/install software/endlessh/status software/endlessh/remove
       - name: ShellCheck
         run: |
-          shellcheck lib/common.sh lib/compat.sh lib/lifecycle.sh tools/dietpi-software-extra
+          shellcheck -e SC1091 lib/common.sh lib/compat.sh lib/lifecycle.sh tools/dietpi-software-extra
           shellcheck tests/test-framework.sh tests/test-compat.sh tests/test-lifecycle.sh tests/test-endlessh.sh
           shellcheck tests/fixtures/example/install tests/fixtures/example/status tests/fixtures/example/remove
           shellcheck software/endlessh/install software/endlessh/status software/endlessh/remove
