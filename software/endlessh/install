@@ -5,8 +5,17 @@ set -euo pipefail
 PORT=${ENDLESSH_PORT:-2222}
 CONFIG=/etc/endlessh/config
 
+[[ $PORT =~ ^[0-9]+$ ]] && (( PORT >= 1 && PORT <= 65535 )) || {
+	echo "ENDLESSH_PORT must be an integer from 1 to 65535." >&2
+	exit 1
+}
+(( PORT >= 1024 )) || {
+	echo "Ports below 1024 require an explicit privileged-port setup and are not configured automatically." >&2
+	exit 1
+}
+
 apt-get update
-DEBIAN_FRONTEND=noninteractive apt-get install -y endlessh
+DEBIAN_FRONTEND=noninteractive apt-get install -y endlessh iproute2
 install -d -m 0755 /etc/endlessh
 
 if [[ ! -e $CONFIG ]]; then
@@ -19,12 +28,18 @@ LogLevel 1
 BindFamily 0
 EOF
 	chmod 0644 "$CONFIG"
+else
+	configured_port=$(awk '$1 == "Port" && $2 ~ /^[0-9]+$/ { port=$2 } END { if (port) print port }' "$CONFIG")
+	if [[ -z $configured_port ]]; then
+		echo "Existing $CONFIG does not contain a valid Port setting." >&2
+		exit 1
+	fi
+	PORT=$configured_port
 fi
 
 unit=$(systemctl show -p FragmentPath --value endlessh.service)
-[[ -n $unit && -f $unit ]] || { echo "endlessh.service was not installed by the Debian package." >&2; exit 1; }
-grep -q '/etc/endlessh/config' "$unit" || {
-	echo "endlessh.service does not reference /etc/endlessh/config as expected." >&2
+[[ -n $unit && -f $unit ]] || {
+	echo "endlessh.service was not installed by the Debian package." >&2
 	exit 1
 }
 
