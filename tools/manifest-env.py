@@ -16,6 +16,7 @@ mapping = {
     "DPS_REQUIRES_CONTAINER": data.get("container", "none"),
     "DPS_REQUIRED_COMMANDS": " ".join(data.get("commands", [])),
     "DPS_REQUIRED_CAPABILITIES": " ".join(data.get("capabilities", [])),
+    "DPS_REQUIRED_PORTS": " ".join(str(port) for port in data.get("ports", [])),
 }
 for key, value in mapping.items():
     print(f"{key}={shlex.quote(value)}")
