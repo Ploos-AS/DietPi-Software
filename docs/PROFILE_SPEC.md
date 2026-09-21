@@ -3,75 +3,77 @@
 ## Concepts
 
 A **software item** installs and manages one independently useful application
-or service.
+or service. A **profile** composes software items into a system role.
 
-A **profile** composes one or more software items and configuration choices
-into a system role.
-
-This separation avoids treating profiles as unofficial DietPi software IDs.
+Repository-local identifiers are not official DietPi software IDs.
 
 ## Software item layout
 
 ```text
-software/<name>/
-├── manifest
+software/<id>/
+├── manifest.json
 ├── install
 ├── status
 ├── remove
 └── README.md
 ```
 
-Only the manifest is mandatory during M0. Lifecycle scripts become required
-when an item is implemented.
+Lifecycle scripts are executable when implemented.
 
-## Profile layout
+## Manifest v1
 
-```text
-profiles/<name>/
-├── manifest
-└── README.md
+M1 uses JSON so manifests can be validated with Python's standard library
+without adding a YAML dependency.
+
+Required fields:
+
+```json
+{
+  "id": "example",
+  "name": "Example",
+  "description": "Example service",
+  "architectures": ["armhf", "arm64", "amd64"],
+  "license": "SPDX-expression",
+  "upstream": "https://example.invalid/"
+}
 ```
 
-Profiles reference software items by their repository-local names.
+Planned compatibility fields include DietPi/Debian constraints, minimum RAM,
+minimum storage, container/native requirements, kernel capabilities and
+network/port requirements.
 
-## Manifest principles
-
-The manifest format introduced during M1 must describe at least:
-
-- stable repository-local identifier
-- display name
-- description
-- supported architectures
-- required DietPi/Debian constraints
-- dependencies
-- upstream project/source
-- license information
-- lifecycle capabilities
-
-Repository-local identifiers are not official DietPi software IDs.
+The `id` must equal the software directory name.
 
 ## Lifecycle
 
-Implemented software items should converge toward:
+Implemented items converge on:
 
 ```text
 install -> status -> remove
 ```
 
-Install operations should be idempotent where practical. Removal must avoid
-deleting user data unless that behaviour is explicit and confirmed.
+Install must be idempotent where practical. Compatibility checks should run
+before system changes. Removal must not silently destroy user data.
+
+The M1 CLI is `tools/dietpi-software-extra`.
+
+## Platform detection
+
+Shared helpers in `lib/common.sh` detect DietPi, Debian codename and Debian
+architecture. Individual software items must not hard-code an SBC model unless
+the software genuinely requires one.
 
 ## Security
 
-Software services must not silently expose management interfaces or weaken
-the host configuration. Profiles which intentionally expose network services
-must document ports, privilege requirements, data collection and log paths.
+Services must not silently expose management interfaces or weaken the host.
+Network ports, privileges, data collection, persistence and log paths must be
+documented.
 
-Honeypot profiles must keep the management plane distinct from intentionally
-exposed deception services.
+Honeypots must keep management access distinct from intentionally exposed
+deception services.
 
-## Hardware
+## Profiles
 
-Software items should not depend on a particular SBC unless technically
-necessary. Hardware qualification is metadata, not a reason to duplicate
-software implementations.
+Profiles will be implemented after the software-item lifecycle is stable.
+They must validate the combined compatibility requirements of all included
+items before installation.
