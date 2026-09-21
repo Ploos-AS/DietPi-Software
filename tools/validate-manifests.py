@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: GPL-2.0-or-later
 
+import argparse
 import json
 import pathlib
 import sys
 
-ROOT = pathlib.Path(__file__).resolve().parents[1]
+DEFAULT_ROOT = pathlib.Path(__file__).resolve().parents[1] / "software"
+parser = argparse.ArgumentParser()
+parser.add_argument("--root", type=pathlib.Path, default=DEFAULT_ROOT)
+args = parser.parse_args()
+
 REQUIRED = {
     "id": str,
     "name": str,
@@ -16,7 +21,7 @@ REQUIRED = {
 }
 
 errors = []
-for manifest in sorted((ROOT / "software").glob("*/manifest.json")):
+for manifest in sorted(args.root.glob("*/manifest.json")):
     try:
         data = json.loads(manifest.read_text())
     except Exception as exc:
@@ -29,6 +34,8 @@ for manifest in sorted((ROOT / "software").glob("*/manifest.json")):
             errors.append(f"{manifest}: {key} must be {typ.__name__}")
     if data.get("id") != manifest.parent.name:
         errors.append(f"{manifest}: id must match directory name")
+    if not data.get("architectures"):
+        errors.append(f"{manifest}: architectures must not be empty")
 
 if errors:
     print("\n".join(errors), file=sys.stderr)
