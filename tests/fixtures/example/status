@@ -1,0 +1,4 @@
+#!/bin/bash
+set -euo pipefail
+state=${DPS_TEST_STATE:?}
+[[ -f "$state/example" ]]
