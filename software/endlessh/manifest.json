@@ -1,0 +1,14 @@
+{
+  "id": "endlessh",
+  "name": "Endlessh",
+  "description": "Lightweight SSH tarpit that slowly sends an endless SSH banner",
+  "architectures": ["armhf", "arm64", "amd64", "i386", "riscv64"],
+  "license": "Unlicense",
+  "upstream": "https://github.com/skeeto/endlessh",
+  "min_ram_mib": 32,
+  "min_storage_mib": 64,
+  "container": "none",
+  "commands": ["apt-get", "systemctl", "ss"],
+  "capabilities": ["root", "systemd"],
+  "ports": [2222]
+}
