@@ -25,3 +25,12 @@ jobs:
           test -s lib/README.md
           test -s tests/README.md
           test -s tools/README.md
+          test -s lib/common.sh
+          test -s tools/dietpi-software-extra
+          test -s tools/validate-manifests.py
+      - name: Shell syntax
+        run: bash -n lib/common.sh tools/dietpi-software-extra
+      - name: ShellCheck
+        run: shellcheck lib/common.sh tools/dietpi-software-extra
+      - name: Validate manifests
+        run: python3 tools/validate-manifests.py
