@@ -1,0 +1,60 @@
+#!/bin/bash
+# SPDX-License-Identifier: GPL-2.0-or-later
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+ROOT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+# shellcheck source=../lib/common.sh
+source "$ROOT_DIR/lib/common.sh"
+
+usage() {
+	cat <<'EOF'
+Usage: dietpi-software-extra <command> [item]
+
+Commands:
+  platform          Show detected host information
+  list              List repository software items
+  install <item>    Install an item
+  status <item>     Show item status
+  remove <item>     Remove an item
+EOF
+}
+
+item_dir() {
+	local name=$1
+	[[ $name =~ ^[a-z0-9][a-z0-9-]*$ ]] || dps_die "Invalid item name: $name"
+	printf '%s/software/%s\n' "$ROOT_DIR" "$name"
+}
+
+run_lifecycle() {
+	local action=$1 name=$2 dir
+	dir=$(item_dir "$name")
+	[[ -d $dir ]] || dps_die "Unknown software item: $name"
+	[[ -x $dir/$action ]] || dps_die "$name does not implement $action"
+	dps_require_root
+	exec "$dir/$action"
+}
+
+case "${1:-}" in
+	platform)
+		printf 'dietpi=%s\n' "$(dps_is_dietpi && echo yes || echo no)"
+		printf 'architecture=%s\n' "$(dps_detect_arch)"
+		printf 'debian_codename=%s\n' "$(dps_detect_debian)"
+		;;
+	list)
+		find "$ROOT_DIR/software" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort
+		;;
+	install|status|remove)
+		[[ $# == 2 ]] || { usage >&2; exit 2; }
+		run_lifecycle "$1" "$2"
+		;;
+	-h|--help|help|'')
+		usage
+		;;
+	*)
+		usage >&2
+		exit 2
+		;;
+esac
