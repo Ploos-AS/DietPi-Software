@@ -36,3 +36,33 @@ jobs:
           bash tests/test-compat.sh
           bash tests/test-lifecycle.sh
           bash tests/test-endlessh.sh
+
+
+  endlessh-package:
+    runs-on: ubuntu-latest
+    container:
+      image: debian:trixie-slim
+    steps:
+      - uses: actions/checkout@v5
+      - name: Verify Endlessh package on Debian Trixie
+        shell: bash
+        run: |
+          set -euo pipefail
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y endlessh systemd
+          test -x /usr/bin/endlessh
+          test -f /lib/systemd/system/endlessh.service || test -f /usr/lib/systemd/system/endlessh.service
+          test -d /etc/endlessh
+          /usr/bin/endlessh -h >/tmp/endlessh-help 2>&1 || rc=$?
+          test "${rc:-0}" -eq 0
+          grep -q '2222' /tmp/endlessh-help
+          grep -q '/etc/endlessh/config' /tmp/endlessh-help
+      - name: Validate Endlessh integration against package layout
+        shell: bash
+        run: |
+          set -euo pipefail
+          unit=/lib/systemd/system/endlessh.service
+          test -f "$unit" || unit=/usr/lib/systemd/system/endlessh.service
+          grep -q '/etc/endlessh/config' "$unit"
+          grep -q 'ENDLESSH_PORT:-2222' software/endlessh/install
+          grep -q '/etc/endlessh/config' software/endlessh/install
