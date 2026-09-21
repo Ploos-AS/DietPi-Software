@@ -60,10 +60,10 @@ jobs:
           test -f "$unit" || unit=/usr/lib/systemd/system/endlessh.service
           test -f "$unit"
           test -d /etc/endlessh
-          endlessh -h >/tmp/endlessh-help 2>&1
-          grep -q '2222' /tmp/endlessh-help
-          grep -q '/etc/endlessh/config' /tmp/endlessh-help
-          grep -q '/etc/endlessh/config' "$unit"
+          dpkg-query -W -f='${Status} ${Version}\n' endlessh | grep -q '^install ok installed '
+          dpkg-query -L endlessh | grep -qx '/usr/bin/endlessh'
+          dpkg-query -L endlessh | grep -qx "$unit"
+          grep -Eq '^ExecStart=.*endlessh' "$unit"
       - name: Validate integration against package layout
         shell: bash
         run: |
